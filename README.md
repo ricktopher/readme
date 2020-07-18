@@ -7,6 +7,8 @@ automating the creation and deletion of README.txt files.
 <br><br>
 Skip below for instruction on how to use*
 
+Use the "Project" folder provided to test the program
+out for yourelf
 * * *
 
 # Program functions
@@ -47,6 +49,16 @@ Following a "Creation -> Annotation -> Deletion"
 cycle will hopefully allow even the messiest of file 
 directories to be left labelled without having
 superfluous README.txt files.
+
+
+## 4. README.md content collation
+
+When you have a large directory structure with lots of
+readme files, you might want to collate all of them
+and have a giant file dump to work off of. The program
+can help you create such a file, so yous don't have
+to hunt all over your directory structure, opening and
+closing who knows how many text files along the way.
 
 
 * * *
@@ -168,7 +180,15 @@ only our annotated README.txt intact.
 	      . subProject2
 	
 
+## 4. README.md content collation
 
+All you have to do is point to the directory where all your
+readmes are and the location of the dump file (file can be
+any name of your choice), and all the contents of the 
+directory and the README.md files will be there.
+
+
+	rick@pop-os:~/Desktop/readme$ readme -d Project -o ./DUMP.md
 
 
 ----------------------------------------------------------------
