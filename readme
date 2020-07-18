@@ -1,0 +1,293 @@
+#!/usr/bin/env python
+
+####################################################################################
+#	Written by Shusruto Rishik (Rick)  
+####################################################################################
+
+import os
+import argparse
+
+####################################################################################
+#	1 
+#	Argparse argument definitions
+####################################################################################
+
+parser = argparse.ArgumentParser(description='Get a tree view of your directories annotated using README.md files. Allows automated creation and deletion of empty README.md files inside each directory, so you don\'t let laziness prevent you from staying organized.'  )
+parser.add_argument("-d", 
+					"--directory",
+					default='.',
+					help='Directory you want to view.')
+parser.add_argument('-c',
+					"--createReadmes", 
+	                help="Creates README.md files where they don't exist.", 
+	                action='store_true',
+					default=False)
+parser.add_argument('-e',
+					"--deleteEmpty", 
+	                help="Delete empty README.md files", 
+	                action='store_true',
+					default=False)
+parser.add_argument("-v", 
+					"--verbose",
+					action='store_true',
+					default=False,
+					help='Show README.md files in tree. There files are not shown by default to avoid clutter') 
+parser.add_argument("-o", 
+					"--output",
+					default=False,
+					help='Location of file where you want to output the contents of all the README.md files to a single file.') 
+
+####################################################################################
+#	2 
+#	Argparse argument unpacking
+####################################################################################
+
+args = parser.parse_args()
+
+DIRECTORY = args.directory
+CREATE_README_FLAG = args.createReadmes
+VERBOSE_TREE = args.verbose
+CLEAN_TREE = args.deleteEmpty
+OUTPUT = args.output
+
+####################################################################################
+#	2.1 
+#	Check to make sure that the directory actually exists
+####################################################################################
+ 
+# only needed for DIRECTORY
+
+#try:
+#    open(DIRECTORY, 'r')
+#except:
+#    # handle error here
+#    print('Must be a valid pathname to an existing directory.')
+#    exit()
+
+
+####################################################################################
+#	3 
+#	ASCII color code class
+####################################################################################
+
+class colors:
+    # reset text color to default
+    reset='\033[0m' 
+	
+    class fg:
+        lightgreen='\033[92m' # color of directory annotation
+        lightblue='\033[94m'  # color of
+        lightred='\033[91m'
+
+####################################################################################
+#	4
+#   Sort os.walk output alphabetically, 
+#	makes it more human readable.
+#	Copypasta from 
+#   https://kubanaltan.wordpress.com/2011/01/21/os-walk-alphabetically-directory-recursion/
+####################################################################################
+
+def sortedWalk(top, topdown=True, onerror=None):
+    from os.path import join, isdir, islink
+ 
+    names = os.listdir(top)
+    names.sort()
+    dirs, nondirs = [], []
+ 
+    for name in names:
+        if isdir(os.path.join(top, name)):
+            dirs.append(name)
+        else:
+            nondirs.append(name)
+ 
+    if topdown:
+        yield top, dirs, nondirs
+
+    for name in dirs:
+        path = join(top, name)
+        if not os.path.islink(path):
+            for x in sortedWalk(path, topdown, onerror):
+                yield x
+    if not topdown:
+        yield top, dirs, nondirs
+
+####################################################################################
+#	5
+#	Default behaviour : show all dirs, subdirs and files
+#	annotate subdirs with contents of README.md
+#   Adapted from 
+#	https://www.bogotobogo.com/python/python_traversing_directory_tree_recursively_os_walk.php
+####################################################################################
+
+def readmeBase(directory):
+	dirCount = 0
+	readmeCount = 0
+	nonReadmeFileCount = 0
+
+	# walk through sorted list of directories
+	for dirpath, dirs, files in sortedWalk(directory):
+		path = dirpath.split('/')
+		readmeText = ''	#  annotation of subdirectory
+
+		# look for a README.md file in directory
+		for f in files:
+
+			if f == 'README.md':
+				readmeCount += 1
+
+				# Get path of README.md file
+				readme = os.path.join(dirpath, f)
+				# check if file is completely empty
+				if os.stat(readme).st_size == 0:
+					readmeText = colors.fg.lightred + '  # No info	' + colors.reset
+
+				# Case where README.md is not empty
+				if os.stat(readme).st_size != 0:
+					with open(readme, 'r') as file:
+						lines = file.readlines()
+						readmeText = ('   # ' + lines[0].strip())
+
+		dirCount += 1
+		# Print subdirectory and correspondind README.md output  
+		print(colors.fg.lightblue  + (len(path))*'   ' + '. ' + os.path.basename(dirpath) + colors.fg.lightgreen + readmeText + colors.reset )
+				
+		# Print out the files and 
+		# (optionally) README.md file
+		for f in files:
+			if f == 'README.md' and not(VERBOSE_TREE):
+				pass
+			else:
+				nonReadmeFileCount += 1
+				print(len(path)*'   ' + '   . ' + f) 
+
+	# print out useful counts 
+	print('Directories: ' + str(dirCount))
+	print('Readme files: ' + str(readmeCount))
+	print('Non-readme files: ' + str(nonReadmeFileCount))
+
+####################################################################################
+#	6
+#	Vomit contents for all the subdirectories into a one file.
+#	Essentially creating an annotated manifesto of all the 
+#	directories and listing all the files
+#   Adapted from 
+#	https://www.bogotobogo.com/python/python_traversing_directory_tree_recursively_os_walk.php
+####################################################################################
+
+def readmeVomit(directory, outputLocation):
+	count = 1
+	# walk through sorted list of directories
+	for dirpath, dirs, files in sortedWalk(directory):
+		path = dirpath.split('/')
+		readmeText = ''	#  annotation of subdirectory
+
+		# look for a README.md file in directory
+		for f in files:
+
+			if f == 'README.md':
+				# Get path of README.md file
+				readme = os.path.join(dirpath, f)
+				# check if file is completely empty
+				if os.stat(readme).st_size == 0:
+					readmeText = '  # No info'
+
+				# Case where README.md is not empty
+				if os.stat(readme).st_size != 0:
+					with open(readme, 'r') as file:
+						lines = file.readlines()
+						readmeText = ''
+						for i in lines:
+							readmeText += '\t' + i
+
+		# Print subdirectory and correspondind README.md output  
+		with open(outputLocation, 'a+') as summary:
+			summary.write("#"*60 + '\n')
+			summary.write("# " + str(count) + "\t \t" + dirpath + '\n')
+			count+=1
+			summary.write("#"*60 + '\n')
+			summary.write(readmeText + '\n')
+			summary.write("-"*60 + '\n')	
+		# Print out the files and 
+		# (optionally) README.md file
+			summary.write('Files in directory: \n')
+		
+			if len(files) == 0:
+				summary.write('\t' + 'No files \n')
+			else:
+				for f in files:
+			#		with open(outputLocation, 'a+') as summary:
+			#			summary.write(dirpath + '\n')
+			#			summary.write(f + '\n') 
+					#print(dirpath)
+					summary.write('\t' + f + '\n') 
+			summary.write("-"*60 + '\n')
+			summary.write('\n')
+
+####################################################################################
+#	7
+#	Create new README.md files inside 
+#	each subdirectory if none exists
+####################################################################################
+
+def readmeCreate(directory):
+	count = 0  # count README.md files created 
+
+	# walk through sorted list of directories
+	for dirpath, dirs, files in sortedWalk(directory):
+		
+		# Check for README.md file absence
+		if not('README.md' in files):
+			readmeFilePath = os.path.join(dirpath, 'README.md' )
+			
+			# Create a new README.md file
+			with open(readmeFilePath, 'a+') as file:
+				count += 1
+	
+	print('Created ' + str(count) + ' README files!')
+
+####################################################################################
+#	8
+#	Clean Empty README.md files inside a directory
+####################################################################################
+
+def readmeClean(directory):
+	count = 0   # Count number of README.md file deleted
+
+	# walk through sorted list of directories
+	for dirpath, dirs, files in sortedWalk(directory):
+
+		# Look for README.md file
+		if 'README.md' in files:
+
+			# get README.md path
+			readmeFilePath = os.path.join(dirpath, 'README.md' )			
+			readmeContents = None 
+
+			if os.stat(readmeFilePath).st_size == 0:
+				os.remove(readmeFilePath)
+				count += 1
+
+	print('Deleted ' + str(count) + ' empty README files!')
+
+####################################################################################
+#	9
+#	Start program execution
+####################################################################################
+
+if OUTPUT:
+	readmeVomit(DIRECTORY, OUTPUT)
+elif CREATE_README_FLAG:
+	readmeCreate(DIRECTORY)
+elif CLEAN_TREE:
+	readmeClean(DIRECTORY)
+else:
+	readmeBase(DIRECTORY)
+
+####################################################################################
+#	End program
+####################################################################################
+
+
+####################################################################################
+#	Program wishlist
+####################################################################################
