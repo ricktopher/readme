@@ -197,30 +197,31 @@ def readmeVomit(directory, outputLocation):
 						lines = file.readlines()
 						readmeText = ''
 						for i in lines:
-							readmeText += '\t' + i
+							readmeText += i
 
 		# Print subdirectory and correspondind README.md output  
 		with open(outputLocation, 'a+') as summary:
-			summary.write("#"*60 + '\n')
-			summary.write("# " + str(count) + "\t \t" + dirpath + '\n')
+			summary.write("\t " + str(count) + "\t" + dirpath + '\n')
+			summary.write("\n")
 			count+=1
-			summary.write("#"*60 + '\n')
+
 			summary.write(readmeText + '\n')
-			summary.write("-"*60 + '\n')	
+	
 		# Print out the files and 
 		# (optionally) README.md file
 			summary.write('Files in directory: \n')
-		
+			summary.write('\n')
+
 			if len(files) == 0:
-				summary.write('\t' + 'No files \n')
+				summary.write('No files \n')
 			else:
 				for f in files:
 			#		with open(outputLocation, 'a+') as summary:
 			#			summary.write(dirpath + '\n')
 			#			summary.write(f + '\n') 
 					#print(dirpath)
-					summary.write('\t' + f + '\n') 
-			summary.write("-"*60 + '\n')
+					summary.write(f + '   <br>' + '\n') 
+
 			summary.write('\n')
 
 ####################################################################################

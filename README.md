@@ -8,10 +8,12 @@ automating the creation and deletion of README.txt files.
 Skip below for instruction on how to use*
 
 Use the "Project" folder provided to test the program
-out for yourelf
+out for yourelf.
+
 * * *
 
 # Program functions
+
 
 ## 1. Overview
 
@@ -32,10 +34,12 @@ Ofcourse, at the end of the day, it's up to you to
 give a concise yet descriptive one-liner.
 
 
+
 ## 2. README.txt creation 
    
 Empty README.txt files are created inside each directory.
 To be annotated by the user later on. 
+
 
 
 ## 3. README.txt deletion
@@ -115,6 +119,8 @@ Suppose you have directory named 'Project' with the following stucture,
 Right now, the directories are not annotated because they have no
 README.txt files. Lets create some some README.txt files
 
+
+
 ## 2. Creating README.txt files
 
 	rick@pop-os:~/Desktop/readme$ ./readme -d Project -c
@@ -147,6 +153,7 @@ Then, if we run the program again we get the following:
 	      . subProject2  # No info	
 
 
+
 ## 3. Deleting unused README.txt files
 
 Notice the directories with the annotations '# No info'. 
@@ -158,7 +165,6 @@ directory structur.
 So, we can just use readme to remove empty README.txt if we
 wont add anything to them.
 
-
 	rick@pop-os:~/Desktop/readme$ ./readme -d Project -e
 	Deleted 2 empty README files!
 
@@ -166,7 +172,6 @@ wont add anything to them.
 Now, if we do an overview of our directory, we shall see
 that the empty README.txt files have been removed, leaving
 only our annotated README.txt intact.
-
 
 	rick@pop-os:~/Desktop/readme$ ./readme -d Project -e
 	Deleted 2 empty README files!
@@ -179,6 +184,7 @@ only our annotated README.txt intact.
 	         . text1.txt
 	      . subProject2
 	
+
 
 ## 4. README.md content collation
 
